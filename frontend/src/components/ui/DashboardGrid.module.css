@@ -1,0 +1,20 @@
+.grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 20px;
+  padding: 20px;
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
