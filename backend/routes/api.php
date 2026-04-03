@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserProfileController;
 
 Route::prefix('auth')->group(function () {
 
@@ -13,4 +14,8 @@ Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
     });
 
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/profile', [UserProfileController::class, 'store']);
 });
