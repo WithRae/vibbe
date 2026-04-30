@@ -1,11 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import styles from './dashboard.module.css';
 import GlowButton from '@/components/ui/GlowButton';
 import NeonCard from '@/components/ui/NeonCard';
+import TaskShatter from '@/components/tasks/TaskShatter';
 
 export default function DashboardPage() {
+  const [shatterTask, setShatterTask] = useState<any>(null);
+const [tasks, setTasks] = useState<{
+  id: string;
+  title: string;
+  microtasks: { id: string; title: string; completed: boolean }[];
+}[]>([
+  { id: '1', title: 'Design landing page', microtasks: [] },
+  { id: '2', title: 'Write backend API', microtasks: [] },
+  { id: '3', title: 'Fix focus timer', microtasks: [] },
+]);
   return (
     <main className={styles.main}>
 
@@ -15,11 +27,12 @@ export default function DashboardPage() {
           <div className={styles.logoIcon}>◈</div>
           <span className={styles.logoText}>VIBBE</span>
         </div>
-        <div className={styles.navTabs}>
-          <button className={styles.navTab}>Home</button>
-          <button className={`${styles.navTab} ${styles.active}`}>Dashboard</button>
-          <button className={styles.navTab}>Summary</button>
-        </div>
+            <div className={styles.navTabs}>
+        <a href="/"><button className={styles.navTab}>Home</button></a>
+        <a href="/dashboard"><button className={`${styles.navTab} ${styles.active}`}>Dashboard</button></a>
+        <a href="/focus"><button className={styles.navTab}>Focus</button></a>
+        <a href="/analytics"><button className={styles.navTab}>Summary</button></a>
+      </div>
         <div className={styles.navRight}>
           <div className={styles.xpBadge}>
             <span className={styles.xpIcon}>⚡</span>
@@ -84,7 +97,10 @@ export default function DashboardPage() {
                 <div key={i} className={styles.taskItem}>
                   <div className={styles.taskCheck}></div>
                   <span className={styles.taskText}>{task}</span>
-                  <button className={styles.taskShatter}>⚡</button>
+                  <button 
+                    className={styles.taskShatter}
+                     onClick={() => setShatterTask(task)}
+>                     ⚡</button>
                 </div>
               ))}
             </div>
@@ -173,9 +189,11 @@ export default function DashboardPage() {
               />
             </div>
             <p className={styles.taskProgressLabel}>45% complete</p>
-            <GlowButton size="lg" onClick={() => {}}>
+           <a href="/focus">
+            <GlowButton size="lg">
               Start Focus Session
             </GlowButton>
+          </a>
           </motion.div>
 
         </div>
@@ -239,6 +257,28 @@ export default function DashboardPage() {
 
         </div>
       </div>
+      {shatterTask && (
+  <TaskShatter
+    task={shatterTask}
+    onClose={() => setShatterTask(null)}
+    onAddMicroTask={(taskId, title) => {
+      setTasks(prev => prev.map(t =>
+        t.id === taskId
+          ? { ...t, microtasks: [...t.microtasks, { id: Date.now().toString(), title, completed: false }] }
+          : t
+      ));
+    }}
+    onCompleteMicroTask={(taskId, microTaskId) => {
+      setTasks(prev => prev.map(t =>
+        t.id === taskId
+          ? { ...t, microtasks: t.microtasks.map((mt: any) =>
+              mt.id === microTaskId ? { ...mt, completed: !mt.completed } : mt
+            )}
+          : t
+      ));
+    }}
+  />
+)}
     </main>
   );
 }

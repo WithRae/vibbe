@@ -2,21 +2,23 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import styles from './login.module.css';
+import styles from './register.module.css';
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
-  e.preventDefault();
-  window.location.href = '/dashboard';
-};
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Register:', name, email, password);
+  };
 
   return (
     <main className={styles.main}>
 
-      {/* Background glow effects */}
+      {/* Background glows */}
       <div className={styles.bgGlow1}></div>
       <div className={styles.bgGlow2}></div>
 
@@ -32,11 +34,23 @@ export default function LoginPage() {
           <span className={styles.logoText}>VIBBE</span>
         </div>
 
-        <h1 className={styles.title}>Welcome Back</h1>
-        <p className={styles.subtitle}>Sign in to continue your focus journey</p>
+        <h1 className={styles.title}>Create Account</h1>
+        <p className={styles.subtitle}>Start your focus journey today</p>
 
         {/* Form */}
         <div className={styles.form}>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Full Name</label>
+            <input
+              type="text"
+              className={styles.input}
+              placeholder="Your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
           <div className={styles.inputGroup}>
             <label className={styles.label}>Email</label>
             <input
@@ -59,17 +73,36 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className={styles.forgotRow}>
-            <a href="#" className={styles.forgotLink}>Forgot password?</a>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Confirm Password</label>
+            <input
+              type="password"
+              className={styles.input}
+              placeholder="••••••••"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+            />
+          </div>
+
+          {/* Energy level selector */}
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Current Energy Level</label>
+            <div className={styles.energySelector}>
+              {['Low', 'Medium', 'High'].map((level) => (
+                <button key={level} className={styles.energyBtn}>
+                  {level}
+                </button>
+              ))}
+            </div>
           </div>
 
           <motion.button
-            className={styles.loginBtn}
-            onClick={handleLogin}
+            className={styles.registerBtn}
+            onClick={handleRegister}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            Sign In
+            Create Account
           </motion.button>
 
           <div className={styles.divider}>
@@ -86,11 +119,12 @@ export default function LoginPage() {
             <span>G</span>
             Continue with Google
           </motion.button>
+
         </div>
 
-        <p className={styles.registerText}>
-          Don't have an account?{' '}
-          <a href="/register" className={styles.registerLink}>Create one</a>
+        <p className={styles.loginText}>
+          Already have an account?{' '}
+          <a href="/login" className={styles.loginLink}>Sign in</a>
         </p>
 
       </motion.div>

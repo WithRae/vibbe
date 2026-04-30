@@ -1,0 +1,347 @@
+/* ── MAIN ── */
+.main {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── BACKGROUND GLOW ── */
+.bgGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 255, 136, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAVBAR ── */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--border-card);
+  background: var(--bg-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoIcon {
+  color: var(--neon-green);
+  font-size: 22px;
+  filter: drop-shadow(0 0 8px var(--neon-green));
+}
+
+.logoText {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--neon-green);
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.navTabs {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 50px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.navTab {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  padding: 8px 24px;
+  border-radius: 50px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.navTab.active {
+  background: var(--neon-green);
+  color: #000;
+  font-weight: 600;
+}
+
+.sessionCount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1px solid var(--border-card);
+  background: var(--bg-card);
+}
+
+.sessionIcon {
+  font-size: 14px;
+}
+
+.sessionText {
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--neon-green);
+}
+/* ── CONTENT ── */
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px 20px;
+  gap: 32px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── MODE SWITCHER ── */
+.modeSwitcher {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 50px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.modeBtn {
+  font-family: var(--font-display);
+  font-size: 13px;
+  padding: 10px 28px;
+  border-radius: 50px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: 0.05em;
+}
+
+.modeBtnActive {
+  background: var(--neon-green);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+/* ── TIMER RING ── */
+.timerWrapper {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timerSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.timeDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 1;
+}
+
+.timeText {
+  font-family: var(--font-display);
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--neon-green);
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+}
+
+.modeLabel {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ── CONTROLS ── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.startBtn {
+  padding: 16px 48px;
+  background: var(--neon-green);
+  color: #000;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+}
+
+.startBtn:hover {
+  background: #fff;
+  box-shadow: var(--shadow-neon-strong);
+}
+
+.pauseBtn {
+  background: transparent;
+  color: var(--neon-green);
+  border: 1px solid var(--neon-green);
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+}
+
+.pauseBtn:hover {
+  background: var(--neon-green-glow);
+}
+
+.resetBtn {
+  padding: 14px 24px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.resetBtn:hover {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
+.skipBtn {
+  padding: 14px 24px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.skipBtn:hover {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
+/* ── SESSION DOTS ── */
+.sessionDots {
+  display: flex;
+  gap: 12px;
+}
+
+.sessionDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--text-muted);
+  background: transparent;
+  transition: var(--transition);
+}
+
+.sessionDotFilled {
+  background: var(--neon-green);
+  border-color: var(--neon-green);
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+}
+
+/* ── CURRENT TASK ── */
+.currentTask {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  padding: 24px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: var(--transition);
+}
+
+.currentTask:hover {
+  border-color: var(--border-card-hover);
+  box-shadow: var(--shadow-neon);
+}
+
+.currentTaskLabel {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.currentTaskTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.changeTaskBtn {
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-btn);
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 4px;
+}
+
+.changeTaskBtn:hover {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .timerWrapper {
+    width: 240px;
+    height: 240px;
+  }
+  .timeText {
+    font-size: 40px;
+  }
+  .controls {
+    flex-direction: column;
+  }
+}

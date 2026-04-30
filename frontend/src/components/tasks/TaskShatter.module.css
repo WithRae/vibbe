@@ -1,0 +1,298 @@
+/* ── OVERLAY ── */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+-webkit-backdrop-filter: blur(4px);
+backdrop-filter: blur(4px);
+}    
+
+/* ── MODAL ── */
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card-hover);
+  border-radius: var(--radius-card);
+  padding: 32px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: var(--shadow-neon-strong);
+  position: relative;
+}
+
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+  opacity: 0.6;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shatterIcon {
+  font-size: 20px;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.8));
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--neon-green);
+  letter-spacing: 0.05em;
+}
+
+.closeBtn {
+  background: transparent;
+  border: 1px solid var(--border-card);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.closeBtn:hover {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
+/* ── TASK TITLE ── */
+.taskTitle {
+  margin-bottom: 24px;
+}
+
+.taskName {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.taskHint {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ── SHATTER BUTTON ── */
+.shatterBtn {
+  width: 100%;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,255,136,0.05));
+  border: 1px solid var(--neon-green);
+  border-radius: var(--radius-card);
+  color: var(--neon-green);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+}
+
+.shatterBtn:hover {
+  background: linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.1));
+  box-shadow: var(--shadow-neon-strong);
+}
+
+.shatterBtnIcon {
+  font-size: 20px;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.8));
+}
+
+/* ── PROGRESS ── */
+.progressSection {
+  margin-bottom: 20px;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.progressLabel {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.progressValue {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--neon-green);
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--neon-green);
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+}
+
+/* ── MICRO TASKS ── */
+.microTaskList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.microTask {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.microTask:hover {
+  border-color: var(--neon-green);
+}
+
+.microTaskDone {
+  opacity: 0.5;
+}
+
+.microTaskDone .microTitle {
+  text-decoration: line-through;
+}
+
+.microCheck {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--neon-green);
+  background: transparent;
+  color: var(--neon-green);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.microCheckDone {
+  background: var(--neon-green);
+  color: #000;
+}
+
+.microTitle {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.microXp {
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--neon-green);
+  opacity: 0.7;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+/* ── ADD MICRO TASK ── */
+.addMicroTask {
+  display: flex;
+  gap: 10px;
+}
+
+.microInput {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.microInput:focus {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+.microInput::placeholder {
+  color: var(--text-muted);
+}
+
+.addBtn {
+  width: 44px;
+  height: 44px;
+  background: var(--neon-green);
+  border: none;
+  border-radius: 50%;
+  color: #000;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.addBtn:hover {
+  background: #fff;
+  box-shadow: var(--shadow-neon-strong);
+}
