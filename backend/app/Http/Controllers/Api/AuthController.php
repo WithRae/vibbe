@@ -12,14 +12,15 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
+            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'confirm_password' => 'required|same:password',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         $user = User::create([
+            'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password, // auto hashed by model cast
+            'password' => $request->password, // hashed via cast
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;

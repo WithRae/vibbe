@@ -277,6 +277,29 @@
   height: 100%;
 }
 
+.checkboxWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.link {
+  color: #00ff88;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .main {
