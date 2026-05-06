@@ -3,68 +3,87 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Resources\AuthResource;
+use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    /**
+     * Register a new user.
+     *
+     * POST /api/v1/auth/register
+     */
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8|confirmed',
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password, // hashed via cast
-        ]);
-
+        $user  = User::create($request->validated());
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
-            'token' => $token
-        ]);
+            'success' => true,
+            'message' => 'Account created successfully.',
+            'data'    => new AuthResource($user, $token),
+        ], 201);
     }
 
-    public function login(Request $request)
+    /**
+     * Authenticate an existing user.
+     *
+     * POST /api/v1/auth/login
+     */
+    public function login(LoginRequest $request): JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
-                'message' => 'Invalid credentials'
+                'success' => false,
+                'message' => 'Invalid credentials. Please check your email and password.',
             ], 401);
         }
 
+        // Revoke all previous tokens to enforce single-session
+        $user->tokens()->delete();
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
-            'token' => $token
+            'success' => true,
+            'message' => 'Login successful.',
+            'data'    => new AuthResource($user, $token),
         ]);
     }
 
-    public function me(Request $request)
+    /**
+     * Return the authenticated user.
+     *
+     * GET /api/v1/auth/me
+     */
+    public function me(Request $request): JsonResponse
     {
-        return response()->json($request->user());
+        return response()->json([
+            'success' => true,
+            'data'    => new UserResource($request->user()),
+        ]);
     }
 
-    public function logout(Request $request)
+    /**
+     * Revoke the current access token (logout).
+     *
+     * POST /api/v1/auth/logout
+     */
+    public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Logged out'
+            'success' => true,
+            'message' => 'Logged out successfully.',
         ]);
     }
 }
