@@ -13,11 +13,7 @@ export default function HomePage() {
           <div className={styles.logoIcon}>◈</div>
           <span className={styles.logoText}>VIBBE</span>
         </div>
-        <div className={styles.navTabs}>
-          <a href="/"><button className={`${styles.navTab} ${styles.active}`}>Home</button></a>
-          <a href="/dashboard"><button className={styles.navTab}>Dashboard</button></a>
-          <a href="/analytics"><button className={styles.navTab}>Summary</button></a>
-        </div>
+        
         <div className={styles.navRight}>
           <a href="/login">
             <button className={styles.loginNavBtn}>Sign In</button>
