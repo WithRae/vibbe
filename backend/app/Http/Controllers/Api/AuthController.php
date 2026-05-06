@@ -60,19 +60,6 @@ class AuthController extends Controller
     }
 
     /**
-     * Return the authenticated user.
-     *
-     * GET /api/v1/auth/me
-     */
-    public function me(Request $request): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'data'    => new UserResource($request->user()),
-        ]);
-    }
-
-    /**
      * Revoke the current access token (logout).
      *
      * POST /api/v1/auth/logout

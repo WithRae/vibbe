@@ -38,24 +38,6 @@ export const authService = {
   },
 
   /**
-   * Fetch the currently authenticated user from the API.
-   * Returns null if no token or token is invalid.
-   */
-  async getMe(): Promise<User | null> {
-    const token = getToken();
-    if (!token) return null;
-
-    try {
-      const response = await apiClient.get<User>('/auth/me');
-      return response.data ?? null;
-    } catch {
-      // Token invalid or expired — clean up
-      removeTokenCookie();
-      return null;
-    }
-  },
-
-  /**
    * Log out: revoke token on server then clear cookie.
    */
   async logout(): Promise<void> {
