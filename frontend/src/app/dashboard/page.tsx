@@ -1,64 +1,58 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import styles from './dashboard.module.css';
-import GlowButton from '@/components/ui/GlowButton';
-import NeonCard from '@/components/ui/NeonCard';
-import TaskShatter from '@/components/tasks/TaskShatter';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import styles from "./dashboard.module.css";
+import GlowButton from "@/components/ui/GlowButton";
+import NeonCard from "@/components/ui/NeonCard";
+import TaskShatter from "@/components/tasks/TaskShatter";
+import AppNavbar from "@/components/shared/AppNavbar";
 
 export default function DashboardPage() {
   const [shatterTask, setShatterTask] = useState<any>(null);
-const [tasks, setTasks] = useState<{
-  id: string;
-  title: string;
-  microtasks: { id: string; title: string; completed: boolean }[];
-}[]>([
-  { id: '1', title: 'Design landing page', microtasks: [] },
-  { id: '2', title: 'Write backend API', microtasks: [] },
-  { id: '3', title: 'Fix focus timer', microtasks: [] },
-]);
+  const [tasks, setTasks] = useState<
+    {
+      id: string;
+      title: string;
+      microtasks: { id: string; title: string; completed: boolean }[];
+    }[]
+  >([
+    { id: "1", title: "Design landing page", microtasks: [] },
+    { id: "2", title: "Write backend API", microtasks: [] },
+    { id: "3", title: "Fix focus timer", microtasks: [] },
+  ]);
+
   return (
     <main className={styles.main}>
-
       {/* ── NAVBAR ── */}
-      <nav className={styles.navbar}>
-        <div className={styles.navLogo}>
-          <div className={styles.logoIcon}>◈</div>
-          <span className={styles.logoText}>VIBBE</span>
-        </div>
-            <div className={styles.navTabs}>
-        <a href="/"><button className={styles.navTab}>Home</button></a>
-        <a href="/dashboard"><button className={`${styles.navTab} ${styles.active}`}>Dashboard</button></a>
-        <a href="/focus"><button className={styles.navTab}>Focus</button></a>
-        <a href="/analytics"><button className={styles.navTab}>Summary</button></a>
-      </div>
-        <div className={styles.navRight}>
-          <div className={styles.xpBadge}>
-            <span className={styles.xpIcon}>⚡</span>
-            <span className={styles.xpText}>Level 3</span>
-            <div className={styles.xpBarWrapper}>
-              <motion.div
-                className={styles.xpBar}
-                initial={{ width: 0 }}
-                animate={{ width: '60%' }}
-                transition={{ duration: 1, delay: 0.5 }}
-              />
+      <AppNavbar
+        activePage="dashboard"
+        rightContent={
+          <>
+            <div className={styles.xpBadge}>
+              <span className={styles.xpIcon}>⚡</span>
+              <span className={styles.xpText}>Level 3</span>
+              <div className={styles.xpBarWrapper}>
+                <motion.div
+                  className={styles.xpBar}
+                  initial={{ width: 0 }}
+                  animate={{ width: "60%" }}
+                  transition={{ duration: 1, delay: 0.5 }}
+                />
+              </div>
             </div>
-          </div>
-          <div className={styles.profileBtn}>
-            <span>👤</span>
-            <span>Mash Profit.</span>
-          </div>
-        </div>
-      </nav>
+            <div className={styles.profileBtn}>
+              <span>👤</span>
+              <span>Mash Profit.</span>
+            </div>
+          </>
+        }
+      />
 
       {/* ── DASHBOARD GRID ── */}
       <div className={styles.grid}>
-
         {/* ── LEFT PANEL ── */}
         <div className={styles.leftPanel}>
-
           {/* Mercy Tokens */}
           <motion.div
             className={styles.mercyCard}
@@ -78,7 +72,9 @@ const [tasks, setTasks] = useState<{
                 <span className={styles.tokenIcon}>🪙</span>
               </div>
             </div>
-            <p className={styles.mercyHint}>Use a token to protect your streak</p>
+            <p className={styles.mercyHint}>
+              Use a token to protect your streak
+            </p>
           </motion.div>
 
           {/* Task List */}
@@ -90,17 +86,26 @@ const [tasks, setTasks] = useState<{
           >
             <div className={styles.taskHeader}>
               <span className={styles.cardTitle}>Tasks</span>
-              <GlowButton size="sm" variant="outline">+ Add</GlowButton>
+              <GlowButton size="sm" variant="outline">
+                + Add
+              </GlowButton>
             </div>
             <div className={styles.taskList}>
-              {['Design landing page', 'Write backend API', 'Fix focus timer'].map((task, i) => (
+              {[
+                "Design landing page",
+                "Write backend API",
+                "Fix focus timer",
+              ].map((task, i) => (
                 <div key={i} className={styles.taskItem}>
                   <div className={styles.taskCheck}></div>
                   <span className={styles.taskText}>{task}</span>
-                  <button 
+                  <button
                     className={styles.taskShatter}
-                     onClick={() => setShatterTask(task)}
->                     ⚡</button>
+                    onClick={() => setShatterTask(task)}
+                  >
+                    {" "}
+                    ⚡
+                  </button>
                 </div>
               ))}
             </div>
@@ -116,12 +121,10 @@ const [tasks, setTasks] = useState<{
             <span>⚙</span>
             <span>Settings</span>
           </motion.div>
-
         </div>
 
         {/* ── CENTER PANEL ── */}
         <div className={styles.centerPanel}>
-
           {/* Focus Heading */}
           <motion.div
             className={styles.centerHeading}
@@ -130,7 +133,9 @@ const [tasks, setTasks] = useState<{
             transition={{ duration: 0.6 }}
           >
             <h1 className={styles.focusTitle}>Single Task Focus</h1>
-            <p className={styles.focusSubtitle}>One task at a time. Full presence.</p>
+            <p className={styles.focusSubtitle}>
+              One task at a time. Full presence.
+            </p>
           </motion.div>
 
           {/* Sentinel Avatar */}
@@ -139,35 +144,86 @@ const [tasks, setTasks] = useState<{
             animate={{
               y: [0, -15, 0],
               filter: [
-                'drop-shadow(0 0 20px #00ff88)',
-                'drop-shadow(0 0 40px #00ff88)',
-                'drop-shadow(0 0 20px #00ff88)',
+                "drop-shadow(0 0 20px #00ff88)",
+                "drop-shadow(0 0 40px #00ff88)",
+                "drop-shadow(0 0 20px #00ff88)",
               ],
             }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           >
             <svg viewBox="0 0 200 200" className={styles.avatarSvg}>
-              <ellipse cx="100" cy="160" rx="70" ry="12"
-                fill="none" stroke="#00ff88" strokeWidth="1" opacity="0.4"/>
-              <ellipse cx="100" cy="160" rx="50" ry="8"
-                fill="none" stroke="#00ff88" strokeWidth="0.5" opacity="0.3"/>
-              <polygon points="100,20 145,60 145,120 100,155 55,120 55,60"
-                fill="none" stroke="#00ff88" strokeWidth="1.5"/>
-              <polygon points="100,20 145,60 100,80"
-                fill="rgba(0,255,136,0.05)" stroke="#00ff88" strokeWidth="1"/>
-              <polygon points="100,20 55,60 100,80"
-                fill="rgba(0,255,136,0.08)" stroke="#00ff88" strokeWidth="1"/>
-              <polygon points="145,60 145,120 100,80"
-                fill="rgba(0,255,136,0.04)" stroke="#00ff88" strokeWidth="1"/>
-              <polygon points="55,60 55,120 100,80"
-                fill="rgba(0,255,136,0.07)" stroke="#00ff88" strokeWidth="1"/>
-              <polygon points="100,155 145,120 100,120"
-                fill="rgba(0,255,136,0.06)" stroke="#00ff88" strokeWidth="1"/>
-              <polygon points="100,155 55,120 100,120"
-                fill="rgba(0,255,136,0.09)" stroke="#00ff88" strokeWidth="1"/>
-              <circle cx="100" cy="88" r="6" fill="#00ff88" opacity="0.9"/>
-              <circle cx="100" cy="88" r="12"
-                fill="none" stroke="#00ff88" strokeWidth="0.5" opacity="0.4"/>
+              <ellipse
+                cx="100"
+                cy="160"
+                rx="70"
+                ry="12"
+                fill="none"
+                stroke="#00ff88"
+                strokeWidth="1"
+                opacity="0.4"
+              />
+              <ellipse
+                cx="100"
+                cy="160"
+                rx="50"
+                ry="8"
+                fill="none"
+                stroke="#00ff88"
+                strokeWidth="0.5"
+                opacity="0.3"
+              />
+              <polygon
+                points="100,20 145,60 145,120 100,155 55,120 55,60"
+                fill="none"
+                stroke="#00ff88"
+                strokeWidth="1.5"
+              />
+              <polygon
+                points="100,20 145,60 100,80"
+                fill="rgba(0,255,136,0.05)"
+                stroke="#00ff88"
+                strokeWidth="1"
+              />
+              <polygon
+                points="100,20 55,60 100,80"
+                fill="rgba(0,255,136,0.08)"
+                stroke="#00ff88"
+                strokeWidth="1"
+              />
+              <polygon
+                points="145,60 145,120 100,80"
+                fill="rgba(0,255,136,0.04)"
+                stroke="#00ff88"
+                strokeWidth="1"
+              />
+              <polygon
+                points="55,60 55,120 100,80"
+                fill="rgba(0,255,136,0.07)"
+                stroke="#00ff88"
+                strokeWidth="1"
+              />
+              <polygon
+                points="100,155 145,120 100,120"
+                fill="rgba(0,255,136,0.06)"
+                stroke="#00ff88"
+                strokeWidth="1"
+              />
+              <polygon
+                points="100,155 55,120 100,120"
+                fill="rgba(0,255,136,0.09)"
+                stroke="#00ff88"
+                strokeWidth="1"
+              />
+              <circle cx="100" cy="88" r="6" fill="#00ff88" opacity="0.9" />
+              <circle
+                cx="100"
+                cy="88"
+                r="12"
+                fill="none"
+                stroke="#00ff88"
+                strokeWidth="0.5"
+                opacity="0.4"
+              />
             </svg>
           </motion.div>
 
@@ -184,23 +240,19 @@ const [tasks, setTasks] = useState<{
               <motion.div
                 className={styles.taskProgressBar}
                 initial={{ width: 0 }}
-                animate={{ width: '45%' }}
+                animate={{ width: "45%" }}
                 transition={{ duration: 1, delay: 0.8 }}
               />
             </div>
             <p className={styles.taskProgressLabel}>45% complete</p>
-           <a href="/focus">
-            <GlowButton size="lg">
-              Start Focus Session
-            </GlowButton>
-          </a>
+            <a href="/focus">
+              <GlowButton size="lg">Start Focus Session</GlowButton>
+            </a>
           </motion.div>
-
         </div>
 
         {/* ── RIGHT PANEL ── */}
         <div className={styles.rightPanel}>
-
           {/* Energy Battery */}
           <motion.div
             className={styles.energyCard}
@@ -216,7 +268,7 @@ const [tasks, setTasks] = useState<{
               <motion.div
                 className={styles.energyBar}
                 initial={{ width: 0 }}
-                animate={{ width: '75%' }}
+                animate={{ width: "75%" }}
                 transition={{ duration: 1, delay: 0.5 }}
               />
             </div>
@@ -226,7 +278,9 @@ const [tasks, setTasks] = useState<{
               <span>Full</span>
             </div>
             <div className={styles.energyBtns}>
-              <GlowButton size="sm" variant="outline">Low Energy Mode</GlowButton>
+              <GlowButton size="sm" variant="outline">
+                Low Energy Mode
+              </GlowButton>
             </div>
           </motion.div>
 
@@ -240,45 +294,64 @@ const [tasks, setTasks] = useState<{
             <h3 className={styles.cardTitle}>Path of Light</h3>
             <div className={styles.pathItems}>
               {[
-                { label: 'Starting time', value: '9:00 AM', active: false },
-                { label: 'Focus session', value: '27 min', active: true },
-                { label: 'Break taken', value: '5 min', active: false },
-                { label: 'Concentrating', value: '50 min', active: false },
+                { label: "Starting time", value: "9:00 AM", active: false },
+                { label: "Focus session", value: "27 min", active: true },
+                { label: "Break taken", value: "5 min", active: false },
+                { label: "Concentrating", value: "50 min", active: false },
               ].map((item, i) => (
                 <div key={i} className={styles.pathItem}>
-                  <span className={`${styles.pathDot} ${item.active ? styles.pathDotActive : ''}`}></span>
+                  <span
+                    className={`${styles.pathDot} ${item.active ? styles.pathDotActive : ""}`}
+                  ></span>
                   <span className={styles.pathLabel}>{item.label}</span>
                   <span className={styles.pathValue}>{item.value}</span>
                 </div>
               ))}
             </div>
-            <GlowButton size="md" onClick={() => {}}>Done</GlowButton>
+            <GlowButton size="md" onClick={() => {}}>
+              Done
+            </GlowButton>
           </motion.div>
-
         </div>
       </div>
+
       {shatterTask && (
-  <TaskShatter
-    task={shatterTask}
-    onClose={() => setShatterTask(null)}
-    onAddMicroTask={(taskId, title) => {
-      setTasks(prev => prev.map(t =>
-        t.id === taskId
-          ? { ...t, microtasks: [...t.microtasks, { id: Date.now().toString(), title, completed: false }] }
-          : t
-      ));
-    }}
-    onCompleteMicroTask={(taskId, microTaskId) => {
-      setTasks(prev => prev.map(t =>
-        t.id === taskId
-          ? { ...t, microtasks: t.microtasks.map((mt: any) =>
-              mt.id === microTaskId ? { ...mt, completed: !mt.completed } : mt
-            )}
-          : t
-      ));
-    }}
-  />
-)}
+        <TaskShatter
+          task={shatterTask}
+          onClose={() => setShatterTask(null)}
+          onAddMicroTask={(taskId, title) => {
+            setTasks((prev) =>
+              prev.map((t) =>
+                t.id === taskId
+                  ? {
+                      ...t,
+                      microtasks: [
+                        ...t.microtasks,
+                        { id: Date.now().toString(), title, completed: false },
+                      ],
+                    }
+                  : t,
+              ),
+            );
+          }}
+          onCompleteMicroTask={(taskId, microTaskId) => {
+            setTasks((prev) =>
+              prev.map((t) =>
+                t.id === taskId
+                  ? {
+                      ...t,
+                      microtasks: t.microtasks.map((mt: any) =>
+                        mt.id === microTaskId
+                          ? { ...mt, completed: !mt.completed }
+                          : mt,
+                      ),
+                    }
+                  : t,
+              ),
+            );
+          }}
+        />
+      )}
     </main>
   );
 }
