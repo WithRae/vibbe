@@ -8,33 +8,33 @@
  *  - Base URL from environment variable
  */
 
-import { getToken } from '@/lib/cookies';
-import type { ApiError, ApiResponse } from '@/types/api';
+import { getToken } from "@/lib/cookies";
+import type { ApiError, ApiResponse } from "@/types/api";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 if (!BASE_URL) {
-  console.warn('[api] NEXT_PUBLIC_API_BASE_URL is not set.');
+  console.warn("[api] NEXT_PUBLIC_API_BASE_URL is not set.");
 }
 
 // ── Custom error class ──────────────────────────────────────────────────────
 
-export class HttpError extends Error implements ApiError {
-  success: false = false;
-  errors?: Record<string, string[]>;
+export class HttpError extends Error {
   statusCode: number;
+  response?: any;
 
-  constructor(message: string, statusCode: number, errors?: Record<string, string[]>) {
+  constructor(message: string, statusCode: number, response?: any) {
     super(message);
-    this.name       = 'HttpError';
+
+    this.name = "HttpError";
     this.statusCode = statusCode;
-    this.errors     = errors;
+    this.response = response;
   }
 }
 
 // ── Request options ─────────────────────────────────────────────────────────
 
-interface RequestOptions extends Omit<RequestInit, 'body'> {
+interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: object;
   /** Skip auth header (for login / register) */
   public?: boolean;
@@ -44,25 +44,28 @@ interface RequestOptions extends Omit<RequestInit, 'body'> {
 
 async function request<T>(
   endpoint: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<ApiResponse<T>> {
   const { body, public: isPublic, ...rest } = options;
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Accept':       'application/json',
+    "Content-Type": "application/json",
+    Accept: "application/json",
   };
 
   if (!isPublic) {
     const token = getToken();
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
   }
 
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...rest,
-    headers: { ...headers, ...(rest.headers as Record<string, string> ?? {}) },
+    headers: {
+      ...headers,
+      ...((rest.headers as Record<string, string>) ?? {}),
+    },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
@@ -71,14 +74,14 @@ async function request<T>(
   try {
     json = await response.json();
   } catch {
-    throw new HttpError('Failed to parse server response.', response.status);
+    throw new HttpError("Failed to parse server response.", response.status);
   }
 
   if (!response.ok) {
     throw new HttpError(
-      json.message ?? 'An error occurred.',
+      json.message ?? "An error occurred.",
       response.status,
-      json.errors
+      json,
     );
   }
 
@@ -88,23 +91,23 @@ async function request<T>(
 // ── HTTP method helpers ─────────────────────────────────────────────────────
 
 export const apiClient = {
-  get<T>(endpoint: string, options?: Omit<RequestOptions, 'body'>) {
-    return request<T>(endpoint, { ...options, method: 'GET' });
+  get<T>(endpoint: string, options?: Omit<RequestOptions, "body">) {
+    return request<T>(endpoint, { ...options, method: "GET" });
   },
 
   post<T>(endpoint: string, body?: object, options?: RequestOptions) {
-    return request<T>(endpoint, { ...options, method: 'POST', body });
+    return request<T>(endpoint, { ...options, method: "POST", body });
   },
 
   put<T>(endpoint: string, body?: object, options?: RequestOptions) {
-    return request<T>(endpoint, { ...options, method: 'PUT', body });
+    return request<T>(endpoint, { ...options, method: "PUT", body });
   },
 
   patch<T>(endpoint: string, body?: object, options?: RequestOptions) {
-    return request<T>(endpoint, { ...options, method: 'PATCH', body });
+    return request<T>(endpoint, { ...options, method: "PATCH", body });
   },
 
   delete<T>(endpoint: string, options?: RequestOptions) {
-    return request<T>(endpoint, { ...options, method: 'DELETE' });
+    return request<T>(endpoint, { ...options, method: "DELETE" });
   },
 };

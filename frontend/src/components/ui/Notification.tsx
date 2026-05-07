@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export type NotificationType = "success" | "error" | "warning";
+export type NotificationType = "success" | "error" | "warning" | "info";
 
 export interface NotificationProps {
   type: NotificationType;
@@ -50,12 +50,25 @@ const WarningIcon = () => (
   </svg>
 );
 
+const InfoIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <circle cx="10" cy="5.5" r="1.5" fill="currentColor" />
+    <path
+      d="M10 9L10 14.5"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 // Diamond (VIBBE logo-inspired) wrapper for the icon
 const DiamondIcon = ({ type }: { type: NotificationType }) => {
   const config = {
     success: { color: "#00e87a", glow: "#00e87a40", Icon: SuccessIcon },
     error: { color: "#ff4060", glow: "#ff406040", Icon: ErrorIcon },
     warning: { color: "#f5a623", glow: "#f5a62340", Icon: WarningIcon },
+    info: { color: "#00b0e8", glow: "#00b0e840", Icon: InfoIcon },
   }[type];
 
   return (
@@ -102,7 +115,7 @@ const ProgressBar = ({
   duration: number;
   type: NotificationType;
 }) => {
-  const color = { success: "#00e87a", error: "#ff4060", warning: "#f5a623" }[
+  const color = { success: "#00e87a", error: "#ff4060", warning: "#f5a623", info: "#00b0e8" }[
     type
   ];
   return (
@@ -151,12 +164,14 @@ export const Notification = ({
     success: "#00e87a33",
     error: "#ff406033",
     warning: "#f5a62333",
+    info: "#00b0e833",
   }[type];
 
   const glowColor = {
     success: "#00e87a18",
     error: "#ff406018",
     warning: "#f5a62318",
+    info: "#00b0e818",
   }[type];
 
   return (
@@ -213,6 +228,7 @@ export const Notification = ({
                   success: "#00e87a",
                   error: "#ff4060",
                   warning: "#f5a623",
+                  info: "#00b0e8",
                 }[type],
                 marginBottom: 4,
               }}
@@ -283,6 +299,8 @@ export const useToast = () => ({
     _addToast?.({ type: "error", title, message, duration }),
   warning: (title: string, message: string, duration?: number) =>
     _addToast?.({ type: "warning", title, message, duration }),
+  info: (title: string, message: string, duration?: number) =>
+    _addToast?.({ type: "info", title, message, duration }),
 });
 
 export const ToastContainer = () => {

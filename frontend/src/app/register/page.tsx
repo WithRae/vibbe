@@ -72,8 +72,8 @@ export default function RegisterPage() {
       setTimeout(() => inputRefs.current[0]?.focus(), 300);
     } catch (err) {
       if (err instanceof HttpError) {
-        const firstFieldError = err.errors
-          ? Object.values(err.errors).flat()[0]
+        const firstFieldError = err.response?.errors
+          ? (Object.values(err.response.errors).flat()[0] as string)
           : null;
         toast.error('Registration Failed', firstFieldError ?? err.message);
       } else {
