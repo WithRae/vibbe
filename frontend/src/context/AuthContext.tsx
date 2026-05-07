@@ -4,7 +4,10 @@ import { authService } from '@/lib/auth';
 import type {
   AuthContextValue,
   LoginPayload,
+  OtpPayload,
   RegisterPayload,
+  RegisterResponse,
+  ResendOtpPayload,
   User,
 } from '@/types/auth';
 
@@ -19,42 +22,61 @@ import {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const [user, setUser] = useState<User | null>(null);
 
+  /**
+   * Register — sends OTP, returns email for the OTP step.
+   * Does NOT redirect; the page handles the step transition.
+   */
   const register = useCallback(
-    async (payload: RegisterPayload) => {
-      const user = await authService.register(payload);
+    async (payload: RegisterPayload): Promise<RegisterResponse> => {
+      return authService.register(payload);
+    },
+    []
+  );
 
-      setUser(user);
-
-      router.push('/dashboard');
+  /**
+   * Verify OTP — activates account, then redirects to login.
+   */
+  const verifyOtp = useCallback(
+    async (payload: OtpPayload): Promise<void> => {
+      await authService.verifyOtp(payload);
+      router.push('/login');
     },
     [router]
   );
 
+  /**
+   * Resend OTP — no redirect, UI handles the countdown reset.
+   */
+  const resendOtp = useCallback(
+    async (payload: ResendOtpPayload): Promise<void> => {
+      await authService.resendOtp(payload);
+    },
+    []
+  );
+
+  /**
+   * Login — persists token, sets user, redirects to dashboard.
+   */
   const login = useCallback(
-    async (payload: LoginPayload) => {
+    async (payload: LoginPayload): Promise<void> => {
       const user = await authService.login(payload);
-
       setUser(user);
-
       router.push('/dashboard');
     },
     [router]
   );
 
-  const logout = useCallback(async () => {
+  /**
+   * Logout — clears token, clears user, redirects to login.
+   */
+  const logout = useCallback(async (): Promise<void> => {
     await authService.logout();
-
     setUser(null);
-
     router.push('/login');
   }, [router]);
 
@@ -65,9 +87,11 @@ export function AuthProvider({
       isLoading: false,
       login,
       register,
+      verifyOtp,
+      resendOtp,
       logout,
     }),
-    [user, login, register, logout]
+    [user, login, register, verifyOtp, resendOtp, logout]
   );
 
   return (

@@ -24,6 +24,25 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface OtpPayload {
+  email: string;
+  otp: string;
+}
+
+export interface ResendOtpPayload {
+  email: string;
+}
+
+// ── Response shapes ─────────────────────────────────────────────────────────
+
+/**
+ * What register() returns — email only, no token yet.
+ * Token is issued only after OTP verification + login.
+ */
+export interface RegisterResponse {
+  email: string;
+}
+
 // ── Auth context shape ──────────────────────────────────────────────────────
 
 export interface AuthContextValue {
@@ -31,6 +50,8 @@ export interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (payload: LoginPayload) => Promise<void>;
-  register: (payload: RegisterPayload) => Promise<void>;
+  register: (payload: RegisterPayload) => Promise<RegisterResponse>;
+  verifyOtp: (payload: OtpPayload) => Promise<void>;
+  resendOtp: (payload: ResendOtpPayload) => Promise<void>;
   logout: () => Promise<void>;
 }

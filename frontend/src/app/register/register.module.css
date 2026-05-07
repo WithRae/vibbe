@@ -300,6 +300,82 @@
   text-decoration: underline;
 }
 
+/* OTP subtitle needs line-height for the two-line email display */
+.subtitle {
+  line-height: 1.7;
+}
+ 
+/* ── OTP BOXES ── */
+.otpRow {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 8px 0;
+}
+ 
+.otpBox {
+  width: 48px;
+  height: 56px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-sm);
+  color: var(--neon-green);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: var(--transition);
+  caret-color: var(--neon-green);
+}
+ 
+.otpBox:focus {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.25);
+}
+ 
+.otpBoxFilled {
+  border-color: var(--neon-green);
+  background: rgba(0, 255, 136, 0.06);
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.15);
+}
+ 
+/* ── RESEND ── */
+.resendRow {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0;
+}
+ 
+.resendBtn {
+  background: none;
+  border: none;
+  color: var(--neon-green);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: var(--transition);
+}
+ 
+.resendBtn:hover {
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+}
+ 
+.resendBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+ 
+.resendTimer {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .main {
@@ -309,5 +385,14 @@
   .avatarWrapper {
     width: 180px;
     height: 180px;
+  }
+}
+
+/* ── RESPONSIVE — OTP boxes ── */
+@media (max-width: 768px) {
+  .otpBox {
+    width: 40px;
+    height: 48px;
+    font-size: 18px;
   }
 }
