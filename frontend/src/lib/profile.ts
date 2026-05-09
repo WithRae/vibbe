@@ -3,7 +3,7 @@
  */
 
 import { apiClient } from '@/lib/api';
-import type { SetupProfilePayload, UserProfile } from '@/types/auth';
+import type { ProfileResponse, SetupProfilePayload, UserProfile } from '@/types/auth';
 
 export const profileService = {
   /**
@@ -18,10 +18,11 @@ export const profileService = {
    * Fetch the authenticated user's profile.
    * Returns null if no profile exists yet.
    */
-  async getProfile(): Promise<UserProfile | null> {
+  async getProfile(): Promise<ProfileResponse | null> {
     try {
-      const response = await apiClient.get<{ profile: UserProfile | null }>('/profile');
-      return response.data?.profile ?? null;
+      const response = await apiClient.get<ProfileResponse>('/profile');
+
+      return response.data ?? null;
     } catch {
       return null;
     }

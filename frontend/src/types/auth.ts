@@ -36,6 +36,12 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface ChangePasswordPayload {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}
+
 export interface OtpPayload {
   email: string;
   otp: string;
@@ -62,6 +68,14 @@ export interface SetupProfilePayload {
  */
 export interface RegisterResponse {
   email: string;
+}
+
+export interface ProfileResponse {
+  id: number;
+  name: string;
+  email: string;
+  created_at: string;
+  profile: UserProfile | null;
 }
 
 // ── Auth context shape ──────────────────────────────────────────────────────

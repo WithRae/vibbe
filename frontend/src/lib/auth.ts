@@ -8,6 +8,7 @@ import { apiClient } from '@/lib/api';
 import { getToken, removeProfileCompletedCookie, removeTokenCookie, setProfileCompletedCookie, setTokenCookie } from '@/lib/cookies';
 import type {
   AuthData,
+  ChangePasswordPayload,
   LoginPayload,
   OtpPayload,
   RegisterPayload,
@@ -63,6 +64,10 @@ export const authService = {
     setTokenCookie(token);
     setProfileCompletedCookie(user.profile_completed);
     return user;
+  },
+
+  async changePassword(payload: ChangePasswordPayload): Promise<void> {
+    await apiClient.patch('/auth/password', payload);
   },
 
   /**

@@ -3,7 +3,7 @@
 import styles from "./AppNavbar.module.css";
 
 interface AppNavbarProps {
-  activePage: "dashboard" | "focus" | "analytics";
+  activePage: "dashboard" | "focus" | "analytics" | "profile";
   rightContent?: React.ReactNode;
 }
 

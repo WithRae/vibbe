@@ -20,6 +20,7 @@ Route::prefix('auth')->group(function () {
     // ── Auth (protected) ───────────────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::patch('/password', [AuthController::class, 'updatePassword']);
     });
 });
 
