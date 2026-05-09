@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\UserResource;
 use App\Models\UserProfile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,14 +29,8 @@ class UserProfileController extends Controller
             ],
             'dob'        => ['required', 'date'],
             'gender'     => ['required', Rule::in(['Male', 'Female', 'Other'])],
-            'avatar'     => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:1024'],
+            'avatar'     => ['nullable', 'string', 'max:100'],
         ]);
-
-        $avatarPath = null;
-
-        if ($request->hasFile('avatar')) {
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-        }
 
         $profile = UserProfile::updateOrCreate(
             ['user_id' => $request->user()->id],
@@ -47,9 +40,12 @@ class UserProfileController extends Controller
                 'username'   => $validated['username'],
                 'dob'        => $validated['dob'],
                 'gender'     => $validated['gender'],
-                'avatar'     => $avatarPath ?? $request->user()->profile?->avatar,
+                'avatar'     => $validated['avatar'] ?? $request->user()->profile?->avatar,
             ]
         );
+
+        // Mark profile as completed on the user row
+        $request->user()->update(['profile_completed' => true]);
 
         return response()->json([
             'success' => true,
@@ -59,7 +55,7 @@ class UserProfileController extends Controller
     }
 
     /**
-     * Return the authenticated user's profile.
+     * Return the authenticated user with their profile.
      *
      * GET /api/v1/profile
      */

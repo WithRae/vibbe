@@ -5,7 +5,7 @@
  */
 
 import { apiClient } from '@/lib/api';
-import { getToken, removeTokenCookie, setTokenCookie } from '@/lib/cookies';
+import { getToken, removeProfileCompletedCookie, removeTokenCookie, setProfileCompletedCookie, setTokenCookie } from '@/lib/cookies';
 import type {
   AuthData,
   LoginPayload,
@@ -61,6 +61,7 @@ export const authService = {
 
     const { user, token } = response.data!;
     setTokenCookie(token);
+    setProfileCompletedCookie(user.profile_completed);
     return user;
   },
 
@@ -73,6 +74,7 @@ export const authService = {
     } finally {
       // Always clear locally, even if server request fails
       removeTokenCookie();
+      removeProfileCompletedCookie();
     }
   },
 

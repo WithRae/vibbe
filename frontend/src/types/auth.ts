@@ -2,7 +2,19 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  profile_completed: boolean;
   created_at: string;
+}
+
+export interface UserProfile {
+  id: number;
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  username: string;
+  dob: string;
+  gender: 'Male' | 'Female' | 'Other';
+  avatar: string | null;
 }
 
 export interface AuthData {
@@ -33,6 +45,15 @@ export interface ResendOtpPayload {
   email: string;
 }
 
+export interface SetupProfilePayload {
+  first_name: string;
+  last_name: string;
+  username: string;
+  dob: string;
+  gender: 'Male' | 'Female' | 'Other';
+  avatar: string | null;
+}
+
 // ── Response shapes ─────────────────────────────────────────────────────────
 
 /**
@@ -53,5 +74,6 @@ export interface AuthContextValue {
   register: (payload: RegisterPayload) => Promise<RegisterResponse>;
   verifyOtp: (payload: OtpPayload) => Promise<void>;
   resendOtp: (payload: ResendOtpPayload) => Promise<void>;
+  setupProfile: (payload: SetupProfilePayload) => Promise<void>;
   logout: () => Promise<void>;
 }

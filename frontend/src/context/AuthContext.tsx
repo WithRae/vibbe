@@ -1,6 +1,8 @@
 'use client';
 
 import { authService } from '@/lib/auth';
+import { setProfileCompletedCookie } from '@/lib/cookies';
+import { profileService } from '@/lib/profile';
 import type {
   AuthContextValue,
   LoginPayload,
@@ -8,6 +10,7 @@ import type {
   RegisterPayload,
   RegisterResponse,
   ResendOtpPayload,
+  SetupProfilePayload,
   User,
 } from '@/types/auth';
 
@@ -65,7 +68,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (payload: LoginPayload): Promise<void> => {
       const user = await authService.login(payload);
+
       setUser(user);
+
+      if (user.profile_completed === true) {
+        router.push('/dashboard');
+      } else {
+        router.push('/profile/create');
+      }
+    },
+    [router]
+  );
+
+  /**
+   * Setup profile — saves profile, then goes to dashboard.
+   */
+  const setupProfile = useCallback(
+    async (payload: SetupProfilePayload): Promise<void> => {
+      await profileService.setupProfile(payload);
+
+      // Update middleware auth state
+      setProfileCompletedCookie(true);
+
+      // Update local user state if present
+      setUser(prev =>
+        prev
+          ? {
+              ...prev,
+              profile_completed: true,
+            }
+          : prev
+      );
+
       router.push('/dashboard');
     },
     [router]
@@ -89,9 +123,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       register,
       verifyOtp,
       resendOtp,
+      setupProfile,
       logout,
     }),
-    [user, login, register, verifyOtp, resendOtp, logout]
+    [user, login, register, verifyOtp, resendOtp, setupProfile, logout]
   );
 
   return (

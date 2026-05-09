@@ -13,7 +13,7 @@
  * A stolen/expired cookie will fail at the API level and the UI handles that.
  */
 
-import { TOKEN_COOKIE } from '@/lib/cookies';
+import { TOKEN_COOKIE, PROFILE_COMPLETED_COOKIE } from '@/lib/cookies';
 import { type NextRequest, NextResponse } from 'next/server';
 
 // ── Route configuration ─────────────────────────────────────────────────────
@@ -43,24 +43,64 @@ function getToken(request: NextRequest): string | null {
   return request.cookies.get(TOKEN_COOKIE)?.value ?? null;
 }
 
+function getProfileCompleted(request: NextRequest): boolean {
+  return (
+    request.cookies.get(PROFILE_COMPLETED_COOKIE)?.value === 'true'
+  );
+}
+
 // ── Middleware ──────────────────────────────────────────────────────────────
 
 export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
-  const token        = getToken(request);
-  const isAuthed     = !!token;
 
-  // Authenticated user trying to visit /login or /register → send to dashboard
+  const token = getToken(request);
+  const profileCompleted = getProfileCompleted(request);
+
+  const isAuthed = !!token;
+
+  // Logged-in users should not access auth pages
   if (isAuthed && matchesRoute(pathname, AUTH_ROUTES)) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(
+      new URL(
+        profileCompleted
+          ? '/dashboard'
+          : '/profile/create',
+        request.url
+      )
+    );
   }
 
-  // Unauthenticated user trying to visit a protected route → send to login
+  // Guests cannot access protected routes
   if (!isAuthed && matchesRoute(pathname, PROTECTED_ROUTES)) {
     const loginUrl = new URL('/login', request.url);
-    // Preserve the intended destination so we can redirect back after login
+
     loginUrl.searchParams.set('redirect', pathname);
+
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Incomplete users cannot access app pages
+  if (
+    isAuthed &&
+    !profileCompleted &&
+    matchesRoute(pathname, PROTECTED_ROUTES) &&
+    pathname !== '/profile/create'
+  ) {
+    return NextResponse.redirect(
+      new URL('/profile/create', request.url)
+    );
+  }
+
+  // Completed users cannot revisit onboarding
+  if (
+    isAuthed &&
+    profileCompleted &&
+    pathname === '/profile/create'
+  ) {
+    return NextResponse.redirect(
+      new URL('/dashboard', request.url)
+    );
   }
 
   return NextResponse.next();
@@ -68,10 +108,6 @@ export function middleware(request: NextRequest): NextResponse {
 
 // ── Matcher ─────────────────────────────────────────────────────────────────
 
-/**
- * Only run middleware on these paths.
- * Exclude _next internals, static files, and API routes.
- */
 export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
