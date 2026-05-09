@@ -7,6 +7,7 @@ import GlowButton from "@/components/ui/GlowButton";
 import NeonCard from "@/components/ui/NeonCard";
 import TaskShatter from "@/components/tasks/TaskShatter";
 import AppNavbar from "@/components/shared/AppNavbar";
+import ProfileDropdown from '@/components/shared/ProfileDropdown';
 
 export default function DashboardPage() {
   const [shatterTask, setShatterTask] = useState<any>(null);
@@ -41,10 +42,7 @@ export default function DashboardPage() {
                 />
               </div>
             </div>
-            <div className={styles.profileBtn}>
-              <span>👤</span>
-              <span>Mash Profit.</span>
-            </div>
+            <ProfileDropdown />
           </>
         }
       />
