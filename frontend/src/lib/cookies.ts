@@ -7,7 +7,7 @@ const isProduction = process.env.NODE_ENV === 'production';
  * Write the auth token cookie.
  */
 export function setTokenCookie(token: string): void {
-  const maxAge = 60 * 60 * 24 * 7; // 7 days
+  const maxAge = 60 * 60 * 24; // 24 hours
   const secure = isProduction ? '; Secure' : '';
 
   document.cookie = [
@@ -23,7 +23,7 @@ export function setTokenCookie(token: string): void {
  * Write profile completion state.
  */
 export function setProfileCompletedCookie(completed: boolean): void {
-  const maxAge = 60 * 60 * 24 * 7; // 7 days
+  const maxAge = 60 * 60 * 24; // 24 hours
   const secure = isProduction ? '; Secure' : '';
 
   document.cookie = [
