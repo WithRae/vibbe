@@ -436,6 +436,75 @@
   color: var(--text-primary);
 }
 
+.addTaskRow {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0;
+  overflow: hidden;
+}
+
+.addTaskInput {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  outline: none;
+}
+
+.addTaskInput:focus {
+  border-color: rgba(0, 255, 136, 0.7);
+}
+
+.addTaskConfirm {
+  background: rgba(0, 255, 136, 0.15);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: 8px;
+  color: #00ff88;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  transition: background 0.2s;
+}
+
+.addTaskConfirm:hover {
+  background: rgba(0, 255, 136, 0.25);
+}
+
+.taskItemDone .taskText {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.taskCheckDone {
+  background: rgba(0, 255, 136, 0.2) !important;
+  border-color: #00ff88 !important;
+  color: #00ff88;
+}
+
+.taskDelete {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 0 4px;
+  transition: color 0.2s;
+}
+
+.taskDelete:hover {
+  color: rgba(255, 80, 80, 0.8);
+}
+
+.taskEmpty {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.85rem;
+  padding: 12px 0;
+  text-align: center;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 1024px) {
   .grid {

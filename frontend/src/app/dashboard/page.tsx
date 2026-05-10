@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import styles from "./dashboard.module.css";
 import GlowButton from "@/components/ui/GlowButton";
 import TaskShatter from "@/components/tasks/TaskShatter";
@@ -10,41 +10,33 @@ import ProfileDropdown from "@/components/shared/ProfileDropdown";
 import MercyCard from "@/components/dashboard/MercyCard";
 import { ToastContainer, useToast } from "@/components/ui/Notification";
 import { profileService } from "@/lib/profile";
+import { taskService } from "@/lib/tasks";
 import type { StreakData } from "@/types/auth";
-
-type Microtask = {
-  id: string;
-  title: string;
-  completed: boolean;
-};
-
-type Task = {
-  id: string;
-  title: string;
-  microtasks: Microtask[];
-};
+import type { Task } from "@/types/task";
 
 export default function DashboardPage() {
   const toast = useToast();
 
   const [streak, setStreak] = useState<StreakData | null>(null);
-  const [shatterTask, setShatterTask] = useState<any>(null);
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: "1", title: "Design landing page", microtasks: [] },
-    { id: "2", title: "Write backend API", microtasks: [] },
-    { id: "3", title: "Fix focus timer", microtasks: [] },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [shatterTask, setShatterTask] = useState<Task | null>(null);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [showAddInput, setShowAddInput] = useState(false);
+  const [tasksLoading, setTasksLoading] = useState(true);
+  const [addingTask, setAddingTask] = useState(false);
 
-  // Fetch profile (which includes streak) on mount
+  // Fetch profile + tasks on mount
   useEffect(() => {
     profileService.getProfile().then((data) => {
-      if (data?.streak) {
-        setStreak(data.streak);
-      }
+      if (data?.streak) setStreak(data.streak);
     });
+
+    taskService.getTasks()
+      .then(setTasks)
+      .finally(() => setTasksLoading(false));
   }, []);
 
-  // Show milestone toast if one was stored after login
+  // Show milestone toast if stored after login
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem('vibbe_milestone');
@@ -62,11 +54,63 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Called by MercyCard after a successful token use
   const handleStreakRestored = (updatedStreak: StreakData) => {
     setStreak(updatedStreak);
     toast.success('Streak Restored!', 'Your mercy token was applied successfully.');
   };
+
+  const handleAddTask = async () => {
+    const title = newTaskTitle.trim();
+    if (!title || addingTask) return;
+
+    setAddingTask(true);
+    try {
+      const task = await taskService.createTask(title);
+      setTasks(prev => [...prev, task]);
+      setNewTaskTitle('');
+      setShowAddInput(false);
+    } catch {
+      toast.error('Error', 'Failed to add task. Please try again.');
+    } finally {
+      setAddingTask(false);
+    }
+  };
+
+  const handleToggleTask = async (task: Task) => {
+    try {
+      const updated = await taskService.toggleTask(task.id);
+      setTasks(prev => prev.map(t => t.id === updated.id ? updated : t));
+    } catch {
+      toast.error('Error', 'Failed to update task.');
+    }
+  };
+
+  const handleDeleteTask = async (task: Task) => {
+    try {
+      await taskService.deleteTask(task.id);
+      setTasks(prev => prev.filter(t => t.id !== task.id));
+    } catch {
+      toast.error('Error', 'Failed to delete task.');
+    }
+  };
+
+  const handleTaskUpdated = (updatedTask: Task) => {
+    setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+    setShatterTask(updatedTask);
+  };
+
+  const activeTasks = tasks.filter(t => !t.completed);
+  const currentTask = activeTasks[0] ?? null;
+
+  const currentTaskProgress = currentTask
+    ? currentTask.microtasks.length > 0
+      ? Math.round(
+          (currentTask.microtasks.filter(mt => mt.completed).length /
+            currentTask.microtasks.length) *
+            100
+        )
+      : 0
+    : 0;
 
   return (
     <main className={styles.main}>
@@ -100,7 +144,6 @@ export default function DashboardPage() {
         {/* ── LEFT PANEL ── */}
         <div className={styles.leftPanel}>
 
-          {/* Mercy + Streak Card */}
           <MercyCard streak={streak} onStreakRestored={handleStreakRestored} />
 
           {/* Task List */}
@@ -112,23 +155,88 @@ export default function DashboardPage() {
           >
             <div className={styles.taskHeader}>
               <span className={styles.cardTitle}>Tasks</span>
-              <GlowButton size="sm" variant="outline">
+              <GlowButton
+                size="sm"
+                variant="outline"
+                onClick={() => setShowAddInput(prev => !prev)}
+              >
                 + Add
               </GlowButton>
             </div>
-            <div className={styles.taskList}>
-              {["Design landing page", "Write backend API", "Fix focus timer"].map((task, i) => (
-                <div key={i} className={styles.taskItem}>
-                  <div className={styles.taskCheck}></div>
-                  <span className={styles.taskText}>{task}</span>
+
+            {/* Inline Add Input */}
+            <AnimatePresence>
+              {showAddInput && (
+                <motion.div
+                  className={styles.addTaskRow}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <input
+                    autoFocus
+                    type="text"
+                    className={styles.addTaskInput}
+                    placeholder="Task title..."
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAddTask();
+                      if (e.key === 'Escape') setShowAddInput(false);
+                    }}
+                    disabled={addingTask}
+                  />
                   <button
-                    className={styles.taskShatter}
-                    onClick={() => setShatterTask(task)}
+                    className={styles.addTaskConfirm}
+                    onClick={handleAddTask}
+                    disabled={addingTask}
                   >
-                    ⚡
+                    {addingTask ? '...' : '✓'}
                   </button>
-                </div>
-              ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Task List */}
+            <div className={styles.taskList}>
+              {tasksLoading ? (
+                <p className={styles.taskEmpty}>Loading tasks...</p>
+              ) : tasks.length === 0 ? (
+                <p className={styles.taskEmpty}>No tasks yet. Add one above!</p>
+              ) : (
+                <AnimatePresence>
+                  {tasks.map((task) => (
+                    <motion.div
+                      key={task.id}
+                      className={`${styles.taskItem} ${task.completed ? styles.taskItemDone : ''}`}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                    >
+                      <button
+                        className={`${styles.taskCheck} ${task.completed ? styles.taskCheckDone : ''}`}
+                        onClick={() => handleToggleTask(task)}
+                      >
+                        {task.completed ? '✓' : ''}
+                      </button>
+                      <span className={styles.taskText}>{task.title}</span>
+                      <button
+                        className={styles.taskShatter}
+                        onClick={() => setShatterTask(task)}
+                      >
+                        ⚡
+                      </button>
+                      <button
+                        className={styles.taskDelete}
+                        onClick={() => handleDeleteTask(task)}
+                      >
+                        ✕
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              )}
             </div>
           </motion.div>
 
@@ -192,19 +300,25 @@ export default function DashboardPage() {
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             <p className={styles.currentTaskLabel}>Current Task</p>
-            <h2 className={styles.currentTaskTitle}>Design landing page</h2>
-            <div className={styles.taskProgress}>
-              <motion.div
-                className={styles.taskProgressBar}
-                initial={{ width: 0 }}
-                animate={{ width: "45%" }}
-                transition={{ duration: 1, delay: 0.8 }}
-              />
-            </div>
-            <p className={styles.taskProgressLabel}>45% complete</p>
-            <a href="/focus">
-              <GlowButton size="lg">Start Focus Session</GlowButton>
-            </a>
+            {currentTask ? (
+              <>
+                <h2 className={styles.currentTaskTitle}>{currentTask.title}</h2>
+                <div className={styles.taskProgress}>
+                  <motion.div
+                    className={styles.taskProgressBar}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${currentTaskProgress}%` }}
+                    transition={{ duration: 1, delay: 0.8 }}
+                  />
+                </div>
+                <p className={styles.taskProgressLabel}>{currentTaskProgress}% complete</p>
+                <a href="/focus">
+                  <GlowButton size="lg">Start Focus Session</GlowButton>
+                </a>
+              </>
+            ) : (
+              <p className={styles.taskEmpty}>All tasks complete! Add a new one.</p>
+            )}
           </motion.div>
         </div>
 
@@ -266,30 +380,16 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {shatterTask && (
-        <TaskShatter
-          task={shatterTask}
-          onClose={() => setShatterTask(null)}
-          onAddMicroTask={(taskId, title) => {
-            setTasks(prev =>
-              prev.map(t =>
-                t.id === taskId
-                  ? { ...t, microtasks: [...t.microtasks, { id: Date.now().toString(), title, completed: false }] }
-                  : t
-              )
-            );
-          }}
-          onCompleteMicroTask={(taskId, microTaskId) => {
-            setTasks(prev =>
-              prev.map(t =>
-                t.id === taskId
-                  ? { ...t, microtasks: t.microtasks.map((mt: any) => mt.id === microTaskId ? { ...mt, completed: !mt.completed } : mt) }
-                  : t
-              )
-            );
-          }}
-        />
-      )}
+      {/* ── TASK SHATTER MODAL ── */}
+      <AnimatePresence>
+        {shatterTask && (
+          <TaskShatter
+            task={shatterTask}
+            onClose={() => setShatterTask(null)}
+            onTaskUpdated={handleTaskUpdated}
+          />
+        )}
+      </AnimatePresence>
     </main>
   );
 }

@@ -3,49 +3,77 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './TaskShatter.module.css';
-
-interface MicroTask {
-  id: string;
-  title: string;
-  completed: boolean;
-}
-
-interface Task {
-  id: string;
-  title: string;
-  microtasks: MicroTask[];
-}
+import { taskService } from '@/lib/tasks';
+import type { Task, MicroTask } from '@/types/task';
 
 interface TaskShatterProps {
   task: Task;
   onClose: () => void;
-  onAddMicroTask: (taskId: string, title: string) => void;
-  onCompleteMicroTask: (taskId: string, microTaskId: string) => void;
+  onTaskUpdated: (task: Task) => void;
 }
 
 export default function TaskShatter({
   task,
   onClose,
-  onAddMicroTask,
-  onCompleteMicroTask,
+  onTaskUpdated,
 }: TaskShatterProps) {
   const [newMicroTask, setNewMicroTask] = useState('');
-  const [isShattered, setIsShattered] = useState(false);
-
-  const handleShatter = () => {
-    setIsShattered(true);
-  };
-
-  const handleAddMicroTask = () => {
-    if (newMicroTask.trim()) {
-      onAddMicroTask(task.id, newMicroTask.trim());
-      setNewMicroTask('');
-    }
-  };
+  const [isShattered, setIsShattered] = useState(task.microtasks.length > 0);
+  const [loading, setLoading] = useState(false);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
 
   const completedCount = task.microtasks.filter(mt => mt.completed).length;
   const totalCount = task.microtasks.length;
   const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
+  const handleAddMicroTask = async () => {
+    const title = newMicroTask.trim();
+    if (!title || loading) return;
+
+    setLoading(true);
+    try {
+      const microtask = await taskService.createMicroTask(task.id, title);
+      onTaskUpdated({
+        ...task,
+        microtasks: [...task.microtasks, microtask],
+      });
+      setNewMicroTask('');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleMicroTask = async (microtask: MicroTask) => {
+    if (togglingId === microtask.id) return;
+    setTogglingId(microtask.id);
+    try {
+      const result = await taskService.toggleMicroTask(task.id, microtask.id);
+      const updatedMicrotasks = task.microtasks.map(mt =>
+        mt.id === microtask.id ? result.microtask : mt
+      );
+      onTaskUpdated({
+        ...task,
+        completed: result.task_completed ? true : task.completed,
+        microtasks: updatedMicrotasks,
+      });
+    } catch {
+      // silently fail — UI stays unchanged
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  const handleDeleteMicroTask = async (microtask: MicroTask) => {
+    try {
+      await taskService.deleteMicroTask(task.id, microtask.id);
+      onTaskUpdated({
+        ...task,
+        microtasks: task.microtasks.filter(mt => mt.id !== microtask.id),
+      });
+    } catch {
+      // silently fail
+    }
+  };
 
   return (
     <motion.div
@@ -78,11 +106,11 @@ export default function TaskShatter({
           <p className={styles.taskHint}>Break this into smaller pieces</p>
         </div>
 
-        {/* Shatter Animation */}
+        {/* Shatter Button or Content */}
         {!isShattered ? (
           <motion.button
             className={styles.shatterBtn}
-            onClick={handleShatter}
+            onClick={() => setIsShattered(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -128,13 +156,25 @@ export default function TaskShatter({
                     transition={{ delay: index * 0.05 }}
                   >
                     <button
-                      className={`${styles.microCheck} ${mt.completed ? styles.microCheckDone : ''}`}
-                      onClick={() => onCompleteMicroTask(task.id, mt.id)}
+                      className={`
+                        ${styles.microCheck}
+                        ${mt.completed ? styles.microCheckDone : ''}
+                        ${togglingId === mt.id ? styles.microCheckLoading : ''}
+                      `}
+                      onClick={() => handleToggleMicroTask(mt)}
+                      disabled={togglingId === mt.id}
                     >
-                      {mt.completed ? '✓' : ''}
+                      {togglingId === mt.id ? '◌' : mt.completed ? '✓' : ''}
                     </button>
                     <span className={styles.microTitle}>{mt.title}</span>
-                    <span className={styles.microXp}>+10 XP</span>
+                    <span className={styles.microXp}>+{mt.xp_reward} XP</span>
+                    <button
+                      className={styles.microDelete}
+                      onClick={() => handleDeleteMicroTask(mt)}
+                      disabled={togglingId === mt.id}
+                    >
+                      ✕
+                    </button>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -155,14 +195,16 @@ export default function TaskShatter({
                 value={newMicroTask}
                 onChange={(e) => setNewMicroTask(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddMicroTask()}
+                disabled={loading}
               />
               <motion.button
                 className={styles.addBtn}
                 onClick={handleAddMicroTask}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                disabled={loading}
               >
-                +
+                {loading ? '...' : '+'}
               </motion.button>
             </div>
           </motion.div>
