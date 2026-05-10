@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\AuthResource;
 use App\Mail\OtpMail;
 use App\Models\User;
+use App\Services\StreakService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
+    public function __construct(private readonly StreakService $streakService) {}
+
     /**
      * Register a new user and send OTP.
      *
@@ -74,7 +77,6 @@ class AuthController extends Controller
             ], 400);
         }
 
-        // Guard: OTP columns missing means registration did not complete properly
         if (is_null($user->otp) || is_null($user->otp_expires_at)) {
             return response()->json([
                 'success' => false,
@@ -137,7 +139,6 @@ class AuthController extends Controller
             ], 400);
         }
 
-        // 60-second cooldown
         if (
             ! is_null($user->otp_sent_at) &&
             Carbon::now()->lessThan(Carbon::parse($user->otp_sent_at)->addSeconds(60))
@@ -172,6 +173,7 @@ class AuthController extends Controller
 
     /**
      * Authenticate an existing user.
+     * Updates login streak and returns streak state in response.
      *
      * POST /api/v1/auth/login
      */
@@ -200,18 +202,26 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Handle streak update
+        $streak = $this->streakService->handleLogin($user);
+
         return response()->json([
             'success' => true,
             'message' => 'Login successful.',
-            'data'    => new AuthResource($user, $token),
+            'data'    => new AuthResource($user, $token, $streak),
         ]);
     }
 
+    /**
+     * Change authenticated user's password.
+     *
+     * PATCH /api/v1/auth/password
+     */
     public function updatePassword(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'current_password' => ['required'],
-            'password' => ['required', 'confirmed', 'min:8'],
+            'password'         => ['required', 'confirmed', 'min:8'],
         ]);
 
         $user = $request->user();

@@ -19,7 +19,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -30,9 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [user, setUser] = useState<User | null>(null);
 
+  // Milestone toast fires after redirect — store pending milestone in a ref
+  // so the dashboard can pick it up via sessionStorage on mount
+  const pendingMilestoneRef = useRef<{ days: number; xp_bonus: number } | null>(null);
+
   /**
    * Register — sends OTP, returns email for the OTP step.
-   * Does NOT redirect; the page handles the step transition.
    */
   const register = useCallback(
     async (payload: RegisterPayload): Promise<RegisterResponse> => {
@@ -53,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   /**
-   * Resend OTP — no redirect, UI handles the countdown reset.
+   * Resend OTP — no redirect.
    */
   const resendOtp = useCallback(
     async (payload: ResendOtpPayload): Promise<void> => {
@@ -63,13 +68,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   /**
-   * Login — persists token, sets user, redirects to dashboard.
+   * Login — persists token, sets user, stores milestone if hit, redirects.
    */
   const login = useCallback(
     async (payload: LoginPayload): Promise<void> => {
-      const user = await authService.login(payload);
+      const { user, milestone } = await authService.login(payload);
 
       setUser(user);
+
+      // Store milestone so dashboard can show the toast after mount
+      if (milestone) {
+        try {
+          sessionStorage.setItem('vibbe_milestone', JSON.stringify(milestone));
+        } catch {
+          // sessionStorage not available (SSR guard)
+        }
+      }
 
       if (user.profile_completed === true) {
         router.push('/dashboard');
@@ -87,17 +101,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (payload: SetupProfilePayload): Promise<void> => {
       await profileService.setupProfile(payload);
 
-      // Update middleware auth state
       setProfileCompletedCookie(true);
 
-      // Update local user state if present
       setUser(prev =>
-        prev
-          ? {
-              ...prev,
-              profile_completed: true,
-            }
-          : prev
+        prev ? { ...prev, profile_completed: true } : prev
       );
 
       router.push('/dashboard');

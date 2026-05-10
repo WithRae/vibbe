@@ -1,11 +1,15 @@
 /**
  * Auth service — all auth-related API calls.
- *
- * Handles token persistence in cookies so components never touch cookies directly.
  */
 
 import { apiClient } from '@/lib/api';
-import { getToken, removeProfileCompletedCookie, removeTokenCookie, setProfileCompletedCookie, setTokenCookie } from '@/lib/cookies';
+import {
+  getToken,
+  removeProfileCompletedCookie,
+  removeTokenCookie,
+  setProfileCompletedCookie,
+  setTokenCookie,
+} from '@/lib/cookies';
 import type {
   AuthData,
   ChangePasswordPayload,
@@ -14,16 +18,13 @@ import type {
   RegisterPayload,
   RegisterResponse,
   ResendOtpPayload,
+  StreakMilestone,
   User,
 } from '@/types/auth';
-
-// ── Auth API calls ──────────────────────────────────────────────────────────
 
 export const authService = {
   /**
    * Register a new user.
-   * Does NOT return a token — user must verify OTP first.
-   * Returns the email so the UI can pass it to the OTP step.
    */
   async register(payload: RegisterPayload): Promise<RegisterResponse> {
     const response = await apiClient.post<RegisterResponse>(
@@ -32,52 +33,58 @@ export const authService = {
       { public: true }
     );
 
-    // Backend returns: { success, message, email }
-    // email lives at top level, not inside data
     return { email: (response as unknown as { email: string }).email };
   },
 
   /**
    * Verify OTP — activates the account.
-   * No token issued here; user is redirected to login.
    */
   async verifyOtp(payload: OtpPayload): Promise<void> {
     await apiClient.post('/auth/verify-otp', payload, { public: true });
   },
 
   /**
-   * Resend OTP to the given email.
+   * Resend OTP.
    */
   async resendOtp(payload: ResendOtpPayload): Promise<void> {
     await apiClient.post('/auth/resend-otp', payload, { public: true });
   },
 
   /**
-   * Log in and persist the token.
+   * Log in, persist the token, and return the user + any milestone hit.
    */
-  async login(payload: LoginPayload): Promise<User> {
+  async login(payload: LoginPayload): Promise<{
+    user: User;
+    milestone: StreakMilestone | null;
+  }> {
     const response = await apiClient.post<AuthData>('/auth/login', payload, {
       public: true,
     });
 
-    const { user, token } = response.data!;
+    const { user, token, streak } = response.data!;
     setTokenCookie(token);
     setProfileCompletedCookie(user.profile_completed);
-    return user;
+
+    return {
+      user,
+      milestone: streak?.milestone_hit ?? null,
+    };
   },
 
+  /**
+   * Change password.
+   */
   async changePassword(payload: ChangePasswordPayload): Promise<void> {
     await apiClient.patch('/auth/password', payload);
   },
 
   /**
-   * Log out: revoke token on server then clear cookie.
+   * Log out: revoke token on server then clear cookies.
    */
   async logout(): Promise<void> {
     try {
       await apiClient.post('/auth/logout');
     } finally {
-      // Always clear locally, even if server request fails
       removeTokenCookie();
       removeProfileCompletedCookie();
     }
@@ -85,7 +92,6 @@ export const authService = {
 
   /**
    * Quick client-side check — does a token cookie exist?
-   * Does NOT validate with server. Use getMe() for a hard check.
    */
   hasToken(): boolean {
     return !!getToken();

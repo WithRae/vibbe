@@ -17,9 +17,27 @@ export interface UserProfile {
   avatar: string | null;
 }
 
+// ── Streak ──────────────────────────────────────────────────────────────────
+
+export interface StreakMilestone {
+  days: number;
+  xp_bonus: number;
+}
+
+export interface StreakData {
+  current: number;
+  longest: number;
+  mercy_tokens: number;
+  is_broken: boolean;
+  milestone_hit: StreakMilestone | null;
+}
+
+// ── Auth data ────────────────────────────────────────────────────────────────
+
 export interface AuthData {
   user: User;
   token: string;
+  streak: StreakData;
 }
 
 // ── Request payloads ────────────────────────────────────────────────────────
@@ -62,10 +80,6 @@ export interface SetupProfilePayload {
 
 // ── Response shapes ─────────────────────────────────────────────────────────
 
-/**
- * What register() returns — email only, no token yet.
- * Token is issued only after OTP verification + login.
- */
 export interface RegisterResponse {
   email: string;
 }
@@ -76,6 +90,7 @@ export interface ProfileResponse {
   email: string;
   created_at: string;
   profile: UserProfile | null;
+  streak: StreakData;
 }
 
 // ── Auth context shape ──────────────────────────────────────────────────────

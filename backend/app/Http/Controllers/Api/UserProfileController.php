@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\UserProfile;
+use App\Services\StreakService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class UserProfileController extends Controller
 {
+    public function __construct(private readonly StreakService $streakService) {}
+
     /**
      * Create or update the authenticated user's profile.
      *
@@ -44,7 +47,6 @@ class UserProfileController extends Controller
             ]
         );
 
-        // Mark profile as completed on the user row
         $request->user()->update(['profile_completed' => true]);
 
         return response()->json([
@@ -55,15 +57,18 @@ class UserProfileController extends Controller
     }
 
     /**
-     * Return the authenticated user with their profile.
+     * Return the authenticated user with their profile and streak state.
      *
      * GET /api/v1/profile
      */
     public function show(Request $request): JsonResponse
     {
+        $user   = $request->user()->load('profile');
+        $streak = $this->streakService->getStreakState($user);
+
         return response()->json([
             'success' => true,
-            'data'    => $request->user()->load('profile'),
+            'data'    => array_merge($user->toArray(), ['streak' => $streak]),
         ]);
     }
 }
