@@ -44,7 +44,7 @@ export default function ProfileDropdown() {
         onClick={() => setOpen(prev => !prev)}
       >
         <span>👤</span>
-        <span>Mash Profit.</span>
+        <span>Profile</span>
       </button>
 
       <AnimatePresence>
