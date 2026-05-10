@@ -19,9 +19,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 
@@ -31,10 +29,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const [user, setUser] = useState<User | null>(null);
-
-  // Milestone toast fires after redirect — store pending milestone in a ref
-  // so the dashboard can pick it up via sessionStorage on mount
-  const pendingMilestoneRef = useRef<{ days: number; xp_bonus: number } | null>(null);
 
   /**
    * Register — sends OTP, returns email for the OTP step.
@@ -72,17 +66,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    */
   const login = useCallback(
     async (payload: LoginPayload): Promise<void> => {
-      const { user, milestone } = await authService.login(payload);
+      const { user, milestone, levelUp } = await authService.login(payload);
 
       setUser(user);
 
       // Store milestone so dashboard can show the toast after mount
-      if (milestone) {
-        try {
+      try {
+        if (milestone) {
           sessionStorage.setItem('vibbe_milestone', JSON.stringify(milestone));
-        } catch {
-          // sessionStorage not available (SSR guard)
         }
+        if (levelUp) {
+          sessionStorage.setItem('vibbe_level_up', String(levelUp));
+        }
+      } catch {
+        // sessionStorage unavailable
       }
 
       if (user.profile_completed === true) {

@@ -56,6 +56,7 @@ export const authService = {
   async login(payload: LoginPayload): Promise<{
     user: User;
     milestone: StreakMilestone | null;
+    levelUp: number | null;
   }> {
     const response = await apiClient.post<AuthData>('/auth/login', payload, {
       public: true,
@@ -68,6 +69,7 @@ export const authService = {
     return {
       user,
       milestone: streak?.milestone_hit ?? null,
+      levelUp:   streak?.level_up     ?? null,
     };
   },
 

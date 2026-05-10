@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\XpTransaction;
 use Carbon\Carbon;
 
 class StreakService
@@ -18,11 +19,22 @@ class StreakService
         100 => 1000,
     ];
 
+    public function __construct(private readonly XpService $xpService) {}
+
     /**
      * Called on every successful login.
-     * Updates the streak and returns the current streak state.
+     * Updates the streak, awards milestone XP if applicable,
+     * and returns the current streak + XP state.
      *
-     * @return array{current: int, longest: int, mercy_tokens: int, is_broken: bool, milestone_hit: array|null}
+     * @return array{
+     *   current: int,
+     *   longest: int,
+     *   mercy_tokens: int,
+     *   is_broken: bool,
+     *   milestone_hit: array|null,
+     *   xp_awarded: int,
+     *   level_up: int|null,
+     * }
      */
     public function handleLogin(User $user): array
     {
@@ -32,6 +44,8 @@ class StreakService
             : null;
 
         $milestoneHit = null;
+        $xpAwarded    = 0;
+        $levelUp      = null;
 
         if ($lastLogin === null) {
             // First ever login
@@ -39,15 +53,35 @@ class StreakService
             $user->last_login_date = $today;
 
         } elseif ($lastLogin === $today) {
-            // Already credited today — do nothing, just return current state
+            // Already credited today — return current state unchanged
 
         } elseif ($lastLogin === Carbon::now('UTC')->subDay()->toDateString()) {
             // Consecutive day — increment
             $user->login_streak++;
             $user->last_login_date = $today;
 
-            // Check milestone
-            $milestoneHit = $this->checkMilestone($user->login_streak);
+            // Check and award milestone XP
+            if (array_key_exists($user->login_streak, self::MILESTONES)) {
+                $milestoneXp  = self::MILESTONES[$user->login_streak];
+                $milestoneHit = [
+                    'days'     => $user->login_streak,
+                    'xp_bonus' => $milestoneXp,
+                ];
+
+                $result    = $this->xpService->award(
+                    user:     $user,
+                    source:   XpTransaction::SOURCE_STREAK_MILESTONE,
+                    amount:   $milestoneXp,
+                    sourceId: null,
+                    meta:     [
+                        'streak_days' => $user->login_streak,
+                        'milestone'   => true,
+                    ],
+                );
+
+                $xpAwarded = $milestoneXp;
+                $levelUp   = $result['level_up'];
+            }
 
         } else {
             // Missed one or more days — streak broken
@@ -69,12 +103,13 @@ class StreakService
             'mercy_tokens' => $user->mercy_tokens,
             'is_broken'    => false,
             'milestone_hit' => $milestoneHit,
+            'xp_awarded'   => $xpAwarded,
+            'level_up'     => $levelUp,
         ];
     }
 
     /**
      * Apply a mercy token to restore a broken streak.
-     * Returns updated streak state or throws on failure.
      *
      * @throws \RuntimeException
      */
@@ -89,7 +124,6 @@ class StreakService
             ? Carbon::parse($user->last_login_date, 'UTC')->toDateString()
             : null;
 
-        // Streak is only "broken" if last login was 2+ days ago
         $daysSince = $lastLogin
             ? Carbon::parse($lastLogin, 'UTC')->diffInDays(Carbon::now('UTC'))
             : null;
@@ -98,7 +132,6 @@ class StreakService
             throw new \RuntimeException('Your streak is not broken — no token needed.');
         }
 
-        // Restore pre-break streak + credit today
         $restored = $user->pre_break_streak > 0
             ? $user->pre_break_streak
             : $user->login_streak;
@@ -108,7 +141,6 @@ class StreakService
         $user->last_login_date  = $today;
         $user->mercy_tokens     = max(0, $user->mercy_tokens - 1);
 
-        // Update longest if restored streak beats it
         if ($user->login_streak > $user->longest_streak) {
             $user->longest_streak = $user->login_streak;
         }
@@ -116,11 +148,13 @@ class StreakService
         $user->save();
 
         return [
-            'current'      => $user->login_streak,
-            'longest'      => $user->longest_streak,
-            'mercy_tokens' => $user->mercy_tokens,
-            'is_broken'    => false,
+            'current'       => $user->login_streak,
+            'longest'       => $user->longest_streak,
+            'mercy_tokens'  => $user->mercy_tokens,
+            'is_broken'     => false,
             'milestone_hit' => null,
+            'xp_awarded'    => 0,
+            'level_up'      => null,
         ];
     }
 
@@ -130,15 +164,13 @@ class StreakService
      */
     public function refillAllMercyTokens(): int
     {
-        return User::where('mercy_tokens', '<', 3)
+        return \App\Models\User::where('mercy_tokens', '<', 3)
             ->update(['mercy_tokens' => 3]);
     }
 
     /**
-     * Build the streak state payload for a user without modifying anything.
-     * Used by profile/get endpoints.
-     *
-     * @return array{current: int, longest: int, mercy_tokens: int, is_broken: bool, milestone_hit: null}
+     * Build the streak state payload without modifying anything.
+     * Used by GET /profile.
      */
     public function getStreakState(User $user): array
     {
@@ -159,23 +191,8 @@ class StreakService
             'mercy_tokens'  => $user->mercy_tokens,
             'is_broken'     => $isBroken,
             'milestone_hit' => null,
+            'xp_awarded'    => 0,
+            'level_up'      => null,
         ];
-    }
-
-    /**
-     * Check if a streak count hits a defined milestone.
-     *
-     * @return array{days: int, xp_bonus: int}|null
-     */
-    private function checkMilestone(int $streak): ?array
-    {
-        if (array_key_exists($streak, self::MILESTONES)) {
-            return [
-                'days'     => $streak,
-                'xp_bonus' => self::MILESTONES[$streak],
-            ];
-        }
-
-        return null;
     }
 }

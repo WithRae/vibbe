@@ -5,13 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\UserProfile;
 use App\Services\StreakService;
+use App\Services\XpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class UserProfileController extends Controller
 {
-    public function __construct(private readonly StreakService $streakService) {}
+    public function __construct(
+        private readonly StreakService $streakService,
+        private readonly XpService    $xpService,
+    ) {}
 
     /**
      * Create or update the authenticated user's profile.
@@ -65,10 +69,14 @@ class UserProfileController extends Controller
     {
         $user   = $request->user()->load('profile');
         $streak = $this->streakService->getStreakState($user);
+        $xp     = $this->xpService->getLevelState($user);
 
         return response()->json([
             'success' => true,
-            'data'    => array_merge($user->toArray(), ['streak' => $streak]),
+            'data'    => array_merge($user->toArray(), [
+                'streak' => $streak,
+                'xp'     => $xp,
+            ]),
         ]);
     }
 }

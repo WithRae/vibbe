@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\MercyController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\MicroTaskController;
 use App\Http\Controllers\Api\UserProfileController;
+use App\Http\Controllers\Api\XpController;
 use Illuminate\Support\Facades\Route;
 
 // ── Auth (public) ──────────────────────────────────────────────────────────
@@ -39,4 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks/{task}/microtasks',                          [MicroTaskController::class, 'store']);
     Route::patch('/tasks/{task}/microtasks/{microtask}/complete',    [MicroTaskController::class, 'toggleComplete']);
     Route::delete('/tasks/{task}/microtasks/{microtask}',            [MicroTaskController::class, 'destroy']);
+
+    // ── XP ────────────────────────────────────────────────────────
+    Route::get('/xp',         [XpController::class, 'state']);
+    Route::get('/xp/history', [XpController::class, 'history']);
 });

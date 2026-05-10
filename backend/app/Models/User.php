@@ -25,6 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
     'pre_break_streak',
     'last_login_date',
     'mercy_tokens',
+    'xp',
 ])]
 #[Hidden(['password', 'remember_token', 'otp', 'otp_expires_at', 'otp_sent_at'])]
 class User extends Authenticatable
@@ -51,12 +52,18 @@ class User extends Authenticatable
             'longest_streak'     => 'integer',
             'pre_break_streak'   => 'integer',
             'mercy_tokens'       => 'integer',
+            'xp'                 => 'integer',
         ];
     }
 
     public function profile()
     {
         return $this->hasOne(UserProfile::class);
+    }
+
+    public function xpTransactions()
+    {
+        return $this->hasMany(XpTransaction::class);
     }
 
     public function tasks(): HasMany

@@ -1,9 +1,12 @@
+import type { XpState } from '@/types/xp';
+
 export interface User {
   id: number;
   name: string;
   email: string;
   profile_completed: boolean;
   created_at: string;
+  xp: XpState;
 }
 
 export interface UserProfile {
@@ -30,6 +33,8 @@ export interface StreakData {
   mercy_tokens: number;
   is_broken: boolean;
   milestone_hit: StreakMilestone | null;
+  xp_awarded: number;
+  level_up: number | null;
 }
 
 // ── Auth data ────────────────────────────────────────────────────────────────
@@ -91,6 +96,7 @@ export interface ProfileResponse {
   created_at: string;
   profile: UserProfile | null;
   streak: StreakData;
+  xp: XpState;
 }
 
 // ── Auth context shape ──────────────────────────────────────────────────────
